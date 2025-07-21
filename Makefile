@@ -1,52 +1,66 @@
-.PHONY: build clean test run install
+.PHONY: build clean test run install build-all
 
-# Build the AKS monitor dashboard
-build:
-	go build -o bin/aks-monitor cmd/aks-monitor/main.go
+# Build all tools
+build-all:
+	@echo "Building all tools..."
+	@cd issue-monitor && make build
+	@echo "✅ All tools built successfully"
 
-# Clean build artifacts
+# Build specific tool
+build-issue-monitor:
+	@echo "Building issue-monitor..."
+	@cd issue-monitor && make build
+
+# Clean all build artifacts
 clean:
-	rm -rf bin/
-	go clean
+	@echo "Cleaning all tools..."
+	@cd issue-monitor && make clean
+	@echo "✅ Clean complete"
 
-# Run tests
+# Run tests for all tools
 test:
-	go test ./...
+	@echo "Running tests for all tools..."
+	@cd issue-monitor && make test
+	@echo "✅ All tests passed"
 
-# Run the application
-run: build
-	./bin/aks-monitor
-
-# Install dependencies
+# Install dependencies for all tools
 install:
-	go mod download
-	go mod tidy
+	@echo "Installing dependencies for all tools..."
+	@cd issue-monitor && make install
+	@echo "✅ Dependencies installed"
 
-# Build for different platforms
-build-linux:
-	GOOS=linux GOARCH=amd64 go build -o bin/aks-monitor-linux cmd/aks-monitor/main.go
-
-build-windows:
-	GOOS=windows GOARCH=amd64 go build -o bin/aks-monitor.exe cmd/aks-monitor/main.go
-
-build-darwin:
-	GOOS=darwin GOARCH=amd64 go build -o bin/aks-monitor-darwin cmd/aks-monitor/main.go
-
-# Build all platforms
-build-all: build-linux build-windows build-darwin
-
-# Development mode with hot reload (requires air)
-dev:
-	air
-
-# Format code
+# Format code for all tools
 fmt:
-	go fmt ./...
+	@echo "Formatting code for all tools..."
+	@cd issue-monitor && make fmt
+	@echo "✅ Code formatted"
 
-# Lint code
+# Lint code for all tools
 lint:
-	golangci-lint run
+	@echo "Linting code for all tools..."
+	@cd issue-monitor && make lint
+	@echo "✅ Code linted"
+
+# Development mode (requires air)
+dev-issue-monitor:
+	@cd issue-monitor && make dev
 
 # Generate documentation
 docs:
-	godoc -http=:6060 
+	@echo "Generating documentation..."
+	@cd issue-monitor && make docs
+	@echo "✅ Documentation generated"
+
+# Help
+help:
+	@echo "Available commands:"
+	@echo "  build-all          - Build all tools"
+	@echo "  build-issue-monitor - Build issue-monitor tool"
+	@echo "  clean              - Clean all build artifacts"
+	@echo "  test               - Run tests for all tools"
+	@echo "  install            - Install dependencies for all tools"
+	@echo "  fmt                - Format code for all tools"
+	@echo "  lint               - Lint code for all tools"
+	@echo "  dev-issue-monitor  - Run issue-monitor in development mode"
+	@echo "  docs               - Generate documentation"
+	@echo "  help               - Show this help message" 
