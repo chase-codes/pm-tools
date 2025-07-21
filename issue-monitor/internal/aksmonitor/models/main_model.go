@@ -241,7 +241,7 @@ func (m *MainModel) renderFooter() string {
 
 	// Add GitHub-specific help when on GitHub tab
 	if m.currentTab == TabGitHubIssues {
-		help += " • 1-6: quick filters • ↑↓: navigate • p: preview • enter: details • f: filter • s: search"
+		help += " • 1-6: quick filters • ↑↓: navigate • p: preview • enter: details • f: filter • s: search • y: copy"
 	}
 
 	if m.error != "" {

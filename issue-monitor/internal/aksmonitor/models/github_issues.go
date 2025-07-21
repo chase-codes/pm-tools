@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -387,6 +388,12 @@ func (m *GitHubIssuesModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// Open selected issue in browser
 				if m.selected != nil {
 					return m, m.openInBrowser()
+				}
+
+			case "y":
+				// Copy issue description to clipboard
+				if m.selected != nil {
+					return m, m.copyToClipboard()
 				}
 
 			case "c":
@@ -967,7 +974,7 @@ func (m *GitHubIssuesModel) updateDetailView() {
 	}
 
 	content.WriteString("\n\n")
-	content.WriteString(metaStyle.Render("Press 'o' to open in browser • 'c' to view comments • 'esc' to go back"))
+	content.WriteString(metaStyle.Render("Press 'o' to open in browser • 'y' to copy description • 'c' to view comments • 'esc' to go back"))
 
 	m.viewport.SetContent(content.String())
 }
@@ -1186,7 +1193,7 @@ func (m *GitHubIssuesModel) renderCommentsView() string {
 	}
 
 	content.WriteString("\n\n")
-	content.WriteString(metaStyle.Render("Press 'esc' to go back • 'o' to open in browser"))
+	content.WriteString(metaStyle.Render("Press 'esc' to go back • 'y' to copy description • 'o' to open in browser"))
 
 	m.viewport.SetContent(content.String())
 
@@ -1361,7 +1368,7 @@ func (m *GitHubIssuesModel) updateCommentsView() {
 	}
 
 	content.WriteString("\n\n")
-	content.WriteString(metaStyle.Render("Press 'esc' to go back • 'o' to open in browser"))
+	content.WriteString(metaStyle.Render("Press 'esc' to go back • 'y' to copy description • 'o' to open in browser"))
 
 	m.viewport.SetContent(content.String())
 }
@@ -1467,4 +1474,33 @@ func (m *GitHubIssuesModel) updatePreviewPane(cursor int) {
 	content.WriteString(hintStyle.Render("↑↓ navigate • enter: full view • p: toggle • o: browser"))
 
 	m.previewPane.SetContent(content.String())
+}
+
+func (m *GitHubIssuesModel) copyToClipboard() tea.Cmd {
+	return func() tea.Msg {
+		if m.selected == nil || m.selected.Issue.Body == nil {
+			return browserActionMsg{
+				success: false,
+				message: "No description available to copy",
+			}
+		}
+
+		body := *m.selected.Issue.Body
+		err := copyToClipboard(body)
+		if err != nil {
+			return browserActionMsg{
+				success: false,
+				message: fmt.Sprintf("Failed to copy to clipboard: %v", err),
+			}
+		}
+
+		return browserActionMsg{
+			success: true,
+			message: "Description copied to clipboard",
+		}
+	}
+}
+
+func copyToClipboard(text string) error {
+	return clipboard.WriteAll(text)
 }
